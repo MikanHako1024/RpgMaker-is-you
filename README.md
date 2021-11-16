@@ -11,6 +11,9 @@
 clone of \<Baba Is You\> by RpgMaker  
 在RPGMaker上复刻《Baba Is You》  
 
+按自己的理解复刻了游戏《Baba Is You》。
+按照最初的理解设计了简单的框架，但在实现过程中发现设计有些缺陷，于是一边重玩游戏一边完善设计，导致现在的代码有点乱，恳请多多包涵 XD。
+在设计和编码的过程中，个人最大的感受就是：在充分考虑后再动手，一定可以设计出一个很巧妙的框架，而不是像我这样修修补补，结果埋下各种bug。
 
 
 ## 已实现的Baba对象类型
@@ -54,13 +57,9 @@ clone of \<Baba Is You\> by RpgMaker
 ##  编辑baba关卡
 
 #### 可以放置图块编辑关卡
-![baba图块](./readme_img/sample-tileset.png)
-
 ![baba图块编辑关卡](./readme_img/sample-edit-by-tileset.png)
 
 #### 可以放置事件编辑关卡
-![baba事件](./readme_img/sample-events.png)
-
 ![baba事件编辑关卡](./readme_img/sample-edit-by-event.png)
 
 #### 运行结果
@@ -152,3 +151,10 @@ clone of \<Baba Is You\> by RpgMaker
 - [ ] 解决wall染色卡顿问题
 - [ ] 破坏类规则 : weak, melt, hot, open, shut, defeat, sink 及特殊影响规则float
 - [ ] ...
+
+## 规则语法树
+Comine soon
+
+## 规则优先级
+Comine soon
+

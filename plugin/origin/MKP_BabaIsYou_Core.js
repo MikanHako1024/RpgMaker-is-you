@@ -1,6 +1,6 @@
 /*!
- * MKP_BabaIsYou_Core - v0.2.1.fix1
- * Updated : 2021-11-14T17:31:00+0800
+ * MKP_BabaIsYou_Core - v0.2.2
+ * Updated : 2021-11-16T18:42:00+0800
  * 
  * https://github.com/MikanHako1024/RpgMaker-is-you
  * Copyright (C) 2021 Mikan(MikanHako)
@@ -22,6 +22,8 @@
  * @author Mikan (MikanHako)
  * @url https://github.com/MikanHako1024/RpgMaker-is-you
  * @version 
+ *   v0.2.2 (2021-11-16T18:42:00+0800)
+ *     整理代码和注释
  *   v0.2.1.fix1 (2021-11-14T17:31:00+0800)
  *     修正部分插件说明
  *     修复回退朝向的问题
@@ -609,19 +611,15 @@ Game_Map.prototype.setup = function(mapId) {
 	_MK_Game_Map_setup.apply(this, arguments);
 
 	if (this.baba_isBabaMap()) {
-		//this._baba_isMoving = false;
-		//this._baba_inputWait = 0;
-		//this.baba_initItemRules();
 		this.baba_initBabaMap();
 
 		this.baba_updateItemRuleAll();
-		// ？初始化中更新规则后 无需进行 is变换 等处理 ...
+		// 初始化中更新规则后 无需进行 is变换 等处理
 		this.baba_updateTileEventImageAll();
 	}
 };
 
 Game_Map.prototype.baba_isBabaMap = function() {
-	//return !!$dataMap.meta['baba is you'];
 	return !!$dataMap.meta['baba is you'] || $dataMap.meta['baba is you'] === '';
 };
 
@@ -677,7 +675,6 @@ Game_Map.prototype.baba_checkObjectExistAll = function() {
 // 启用禁用
 
 Game_Map.prototype.baba_isBabaMapEnabled = function() {
-	//return this._babaMapEnabled;
 	return this.baba_isBabaMap() && this._babaMapEnabled;
 };
 Game_Map.prototype.baba_enableBabaMap = function() {
@@ -687,15 +684,7 @@ Game_Map.prototype.baba_disableBabaMap = function() {
 	this._babaMapEnabled = false;
 };
 
-/*
-const _MK_Game_Player_update = Game_Player.prototype.update;
-Game_Player.prototype.update = function(sceneActive) {
-	if (!$gameMap.baba_isBabaMapEnabled()) {
-		_MK_Game_Player_update.apply(this, arguments);
-	}
-};
-*/
-// ？修改 canMove 使角色无法移动 ...
+// 修改 canMove 使角色无法移动
 const _MK_Game_Player_canMove = Game_Player.prototype.canMove;
 Game_Player.prototype.canMove = function() {
 	var res = _MK_Game_Player_canMove.apply(this, arguments);
@@ -711,66 +700,17 @@ Game_Player.prototype.canMove = function() {
 // --------------------------------
 // update
 
-/*
-Game_Map.prototype.updateInterpreter = function() {
-	for (;;) {
-		if (this.baba_isBabaMapEnabled()) {
-			return ;
-		}
-
-		this._interpreter.update();
-		if (this._interpreter.isRunning()) {
-			return;
-		}
-		if (this._interpreter.eventId() > 0) {
-			this.unlockEvent(this._interpreter.eventId());
-			this._interpreter.clear();
-		}
-		if (!this.setupStartingEvent()) {
-			return;
-		}
-	}
-};
-// 重写了 Game_Map.prototype.updateInterpreter
-*/
-
 const _MK_Game_Map_updateInterpreter = Game_Map.prototype.updateInterpreter;
 Game_Map.prototype.updateInterpreter = function() {
-	//_MK_Game_Map_updateInterpreter.apply(this, arguments);
-	// ？考虑进入谜题时 阻止其他命令指令 完成后再继续执行 ...
-	// ？但这样将无法在 谜题进行时 进行其他事件触发 ...
+	// 进入谜题时 阻止其他命令指令 完成后再继续执行
+	// 但这样将无法在 谜题进行时 进行其他事件触发
+	// FINISH : 触发子事件
 
-	//if (this.baba_isBabaMap() && this.baba_isBabaMapEnabled()) {
 	if (this.baba_isBabaMapEnabled()) {
-		//this.baba_updateInterpreter_updateBabaMapInput();
-
-		/*if (!!this._interpreter._childInterpreter) {
-			this.baba_updateChildInterpreter();
-		}
-		else {
-			this.baba_updateInterpreter_updateBabaMapInput();
-		}*/
-		/*if (this.baba_haveBabaChildInterpreter()) {
-			this.baba_updateBabaChildInterpreter();
-		}
-		else {
-			this.baba_updateInterpreter_updateBabaMapInput();
-		}*/
 		if (this.baba_puzzleEventIsRunning()) {
 			this.baba_updatePuzzleEventInterpreter();
 		}
 		else {
-			// 临时
-			// 处理用脚本执行的 baba_setItem 的规则更新
-			/*if (this.baba_babaEvents().some(e => e._baba_itemChanged)) {
-				this.baba_babaEvents().forEach(e => e._baba_itemChanged = false);
-
-				this.baba_updateItemRuleAll();
-				this.baba_updateTileEventImageAll();
-				this._baba_somethingChanged = true; // 通知 规则列表窗口 更新
-			}*/
-
-			//this.baba_updateInterpreter_updateBabaMapInput();
 			this.baba_updateBabaMapTurn();
 		}
 
@@ -782,34 +722,10 @@ Game_Map.prototype.updateInterpreter = function() {
 		_MK_Game_Map_updateInterpreter.apply(this, arguments);
 	}
 
-	// ？地图不可用时 也要 更新baba事件的Pattern ...
+	// 地图不可用时 也要 更新baba事件的Pattern
 	this.baba_updateBabaEventAnimation();
 };
-/*Game_Map.prototype.baba_updateChildInterpreter = function() {
-	var inter = this._interpreter;
-	while (inter.isRunning()) {
-		if (!inter._childInterpreter) {
-			break;
-		}
-		if (inter.updateChild()) {
-			break;
-		}
-	}
-};*/
-/*Game_Map.prototype.baba_haveBabaChildInterpreter = function() {
-	return !!this._baba_babaChildInterpreter;
-};
-Game_Map.prototype.baba_updateBabaChildInterpreter = function() {
-	if (this._baba_babaChildInterpreter) {
-		this._baba_babaChildInterpreter.update();
-		if (this._baba_babaChildInterpreter.isRunning()) {
-			return true;
-		} else {
-			this._baba_babaChildInterpreter = null;
-			return false;
-		}
-	}
-};*/
+
 Game_Map.prototype.baba_puzzleEventIsRunning = function() {
 	return !!this._baba_puzzleInterpreter;
 };
@@ -824,7 +740,7 @@ Game_Map.prototype.baba_updatePuzzleEventInterpreter = function() {
 		}
 	}
 };
-//Game_Map.prototype.baba_updateInterpreter_updateBabaMapInput = function() {
+
 Game_Map.prototype.baba_updateBabaMapTurn = function() {
 	var haveInput = false;
 	var inputChanged = false;
@@ -835,82 +751,63 @@ Game_Map.prototype.baba_updateBabaMapTurn = function() {
 		// 注意 更新输入 同时写入了移动
 
 		var inputSingnal = this.baba_getInputSignal();
-		//var puzzleWin = false;
-		//var puzzleGameover = false;
 		if (inputSingnal > 0) {
 			// 有操作才进行更新
 
 			// 添加移动
 			if (inputSingnal == 1) {
-				this.baba_updateNewRouteTurnAll(); // ?
+				// 写入移动
+				this.baba_updateNewRouteTurnAll();
 				this.baba_updateInputMove(Input.dir4);
 				this._baba_isMoving = true;
 			}
 			else if (inputSingnal == 2) {
-				this.baba_updateNewRouteTurnAll(); // ?
+				// 写入移动
+				this.baba_updateNewRouteTurnAll();
 				this.baba_updateInputWait();
 				this._baba_isMoving = true;
 			}
 			else if (inputSingnal == 3) {
+				// 写入移动
 				this.baba_updateInputBack();
-				this.baba_updatePopRouteTurnAll(); // ?
+				this.baba_updatePopRouteTurnAll();
 				this._baba_isMoving = true;
 			}
 			// TODO : ...
 
-			/*
-			// 写入移动
 			var back = (inputSingnal == 3);
 			if (!back) {
 				// YouMove or WaitMove
-				this.baba_updateNewRouteTurnAll();
-			}
-			else {
-				// BackMove
-				this.baba_updatePopRouteTurnAll();
-			}
-
-			// 执行移动
-			this.baba_updateExecuteMoveAll(back);
-			*/
-
-			var back = (inputSingnal == 3);
-			if (!back) {
-				// YouMove or WaitMove
-
 				if (this.baba_checkHaveAnyReadyRoute()) {
-					// 写入移动
-					//this.baba_updateNewRouteTurnAll();
-
 					inputChanged = true;
+					// 执行移动
 					this.baba_updateExecuteMoveAll(back);
 				}
 				else {
-					this.baba_updatePopRouteTurnAll(); // ?
+					this.baba_updatePopRouteTurnAll();
 				}
 			}
 			else {
 				// BackMove
-
-				// 写入移动
-				//this.baba_updatePopRouteTurnAll();
 				// 执行移动
 				this.baba_updateExecuteMoveAll(back);
-
 				inputChanged = true;
 			}
 
-			// TODO : 检查是否有实际移动
-			// ？无实际移动时 不记录历史移动 也不更新规则 ...
-
+			// FINISH : 检查是否有实际移动
+			// 无实际移动时 不记录历史移动 也不更新规则
 
 			this.baba_updateItemRuleAll();
 
-			// TODO : item变换 等
-			// 处理 is变换
+
+			// TODO : 各规则影响的顺序
+
+			// TODO : ？更方便 执行规则 的框架 ...
+
 			// TODO : 考虑各部分执行顺序
 			// TODO : ？研究 物体变成文字或文字变成物体之后 对规则的影响 ...
 			// ？是否应该是 移动 -> 更新规则 -> 处理is变换 -> 再次更新规则 之后不会再处理is变换 ...
+
 
 			var isTransformChanged = this.baba_updateRuleEffect_isTransform();
 			if (isTransformChanged) {
@@ -918,40 +815,21 @@ Game_Map.prototype.baba_updateBabaMapTurn = function() {
 				inputChanged = true;
 			}
 
-			// TODO : 各规则影响的顺序
-
-			// TODO : ？更方便 执行规则 的框架 ...
-
-
 			this.baba_updateTileEventImageAll();
 
 			var puzzleWin = this.baba_updatePuzzleWin();
-			//puzzleWin = this.baba_updatePuzzleWin();
 			if (puzzleWin) {
 				//console.log('success');
 			}
-			/*else {
-				var puzzleGameover = this.baba_updatePuzzleGameover();
-				if (puzzleGameover) {
-					console.log('gameover');
-				}
-				else {
-				}
-				// ...
-			}*/
-			// ？没有输入时 也要处理游戏结束的计时 ...
-			// ...
 
 			haveInput = true;
 		}
 	}
 
-	//var puzzleGameover = this.baba_updatePuzzleGameover();
+	// 没有输入时 也要处理游戏结束的计时
 	var puzzleGameover = this.baba_updatePuzzleGameover(inputChanged);
 	if (puzzleGameover) {
 		//console.log('gameover');
-	}
-	else {
 	}
 
 	this.baba_updateInputWaitCount(haveInput);
@@ -959,7 +837,6 @@ Game_Map.prototype.baba_updateBabaMapTurn = function() {
 	// 临时
 	// 通知 SceneMap 刷新显示规则
 	if (haveInput) {
-		// TODO : 检查是否有实际改变
 		this._baba_somethingChanged = true;
 		// 通知 规则列表窗口 更新
 	}
@@ -974,7 +851,6 @@ Game_Map.prototype.baba_isMoving = function() {
 		this._baba_isMoving = isMoving;
 	}
 	return this._baba_isMoving;
-	// ...
 };
 Game_Map.prototype.baba_updateInputWaitCount = function(wait) {
 	if (wait) {
@@ -990,34 +866,10 @@ Game_Map.prototype.baba_updateInputWaitCount = function(wait) {
 	}
 };
 Game_Map.prototype.baba_canInput = function() {
-	//return !this.baba_isMoving() && this._baba_inputWait <= 0;
 	return this._baba_inputWait <= 0 && !this.baba_isMoving();
 };
 
-/*
-Game_Map.prototype.baba_updateInput = function() {
-	if (Input.dir4 > 0) {
-		this.baba_updateInputMove(Input.dir4);
-		this._baba_isMoving = true;
-		return 1;
-	}
-	else if (Input.isRepeated('ok')) {
-		this.baba_updateInputWait();
-		this._baba_isMoving = true;
-		return 2;
-	}
-	else if (Input.isRepeated('escape')) {
-		this.baba_updateInputBack();
-		this._baba_isMoving = true;
-		return 3;
-	}
-	else {
-		// 无操作
-		return 0;
-	}
-};
-*/
-// ？分离 检测输入 与 写入准备的移动 ...
+// 分离 检测输入 与 写入准备的移动
 Game_Map.prototype.baba_getInputSignal = function() {
 	if (Input.dir4 > 0) {
 		return 1;
@@ -1035,11 +887,8 @@ Game_Map.prototype.baba_getInputSignal = function() {
 
 
 Game_Map.prototype.baba_updateInputMove = function(direction) {
-	//this.baba_addYouMoveAll(direction);
-	//this.baba_addMoveMoveAll();
-
-	// ？无you规则物体时 方向键不代替wait ...
-	// TODO : 是否要这样
+	// 无you规则物体时 方向键不代替wait
+	// TODO : 考虑是否要这样
 	if (this.baba_babaEvents()
 			.some(e => e.baba_checkRule('you'))) {
 		this.baba_addYouMoveAll(direction);
@@ -1128,19 +977,16 @@ Game_Map.prototype.baba_isPuzzleWin = function() {
 
 Game_Map.prototype.baba_checkPuzzleGameover = function() {
 	// 检查 不存在You规则的对象 表示gameover
-	// TODO : ？wait操作后有move移动、shift移动时 暂时解除gameover ...
-	//var puzzleGameover = this.baba_babaEvents()
-	//	.every(e => !e.baba_checkRule('you'));
+	// FINISH : wait操作后有move移动、shift移动等时 暂时解除gameover
 	var puzzleGameover = !this.baba_babaEvents()
 		.some(e => e.baba_checkRule('you'));
 	return puzzleGameover;
 };
 
-//Game_Map.prototype.baba_updatePuzzleGameover = function() {
 Game_Map.prototype.baba_updatePuzzleGameover = function(inputChanged) {
 	var puzzleGameover = !inputChanged && this.baba_checkPuzzleGameover();
 	if (puzzleGameover) {
-		if (this._baba_puzzleGameoverCount >= 120) {
+		if (this._baba_puzzleGameoverCount >= 120) { // TODO : 可配置
 			if (this._baba_puzzleGameover != true) {
 				this._baba_puzzleGameover = true;
 				this.baba_executeEventPuzzleGameoverStart();
@@ -1157,56 +1003,13 @@ Game_Map.prototype.baba_updatePuzzleGameover = function(inputChanged) {
 		}
 		this._baba_puzzleGameoverCount = 0;
 	}
-	//return puzzleGameover;
 	return this._baba_puzzleGameover;
 };
 
-/*Game_Map.prototype.baba_getPuzzleGameoverEventId = function() {
-	var eventIdStr = $dataMap.meta['BIY puzzle gameover'];
-	if (eventIdStr) {
-		return Number.parseInt(eventIdStr || 0) || 0;
-	}
-	else {
-		return 0;
-	}
-};
-Game_Map.prototype.baba_executeEventPuzzleGameoverStart = function() {
-	var eventId = this.baba_getPuzzleGameoverEventId();
-	if (eventId > 0) {
-		var key = [this._mapId, eventId, 'A'];
-		$gameSelfSwitches.setValue(key, true);
-	}
-};
-Game_Map.prototype.baba_executeEventPuzzleGameoverEnd = function() {
-	var eventId = this.baba_getPuzzleGameoverEventId();
-	if (eventId > 0) {
-		var key = [this._mapId, eventId, 'B'];
-		$gameSelfSwitches.setValue(key, true);
-	}
-};*/
-// ？阻塞在进入babaisyou谜题的事件中 所以不能直接执行其他事件 ...
-// ？需要用 setupChild ...
-
-/*Game_Map.prototype.baba_executePuzzleGameoverEvent = function(eventId) {
-	//var commonEvent = $dataCommonEvents[eventId];
-	//if (eventId > 0 && !!commonEvent) {
-	var eventData = $dataMap.events[eventId];
-	if (eventId > 0 && !!eventData) {
-		if (this._interpreter.isRunning()) {
-			this._interpreter.setupChild(eventData.pages[0].list, eventId);
-		}
-		else {
-			this._interpreter.setup(eventData.pages[0].list, eventId);
-		}
-	}
-};*/
-// ？新建一个子解释器 用于专门执行babaisyou的事件 ...
+// 新建一个子解释器 用于专门执行babaisyou的事件
 Game_Map.prototype.baba_executePuzzleGameoverEvent = function(eventId) {
 	var eventData = $dataMap.events[eventId];
 	if (eventId > 0 && !!eventData && !!eventData.pages[0]) {
-		// this.baba_setupBabaEventChildInterpreter(list, eventId)
-		//this._baba_babaChildInterpreter = new Game_Interpreter(0);
-		//this._baba_babaChildInterpreter.setup(eventData.pages[0].list, eventId);
 		this._baba_puzzleInterpreter = new Game_Interpreter(0);
 		this._baba_puzzleInterpreter.setup(eventData.pages[0].list, eventId);
 	}
@@ -1216,28 +1019,20 @@ Game_Map.prototype.baba_getPuzzleGameoverStartEventId = function() {
 	var eventIdStr = $dataMap.meta['BIY puzzle gameover start'];
 	return Number.parseInt(eventIdStr || 0) || 0;
 };
+Game_Map.prototype.baba_executeEventPuzzleGameoverStart = function() {
+	var eventId = this.baba_getPuzzleGameoverStartEventId();
+	if (eventId > 0) {
+		this.baba_executePuzzleGameoverEvent(eventId);
+	}
+};
+
 Game_Map.prototype.baba_getPuzzleGameoverEndEventId = function() {
 	var eventIdStr = $dataMap.meta['BIY puzzle gameover end'];
 	return Number.parseInt(eventIdStr || 0) || 0;
 };
-
-Game_Map.prototype.baba_executeEventPuzzleGameoverStart = function() {
-	var eventId = this.baba_getPuzzleGameoverStartEventId();
-	if (eventId > 0) {
-		/*var commonEvent = $dataCommonEvents[eventId];
-		if (commonEvent) {
-			this.setupChild(commonEvent.list, eventId);
-		}*/
-		this.baba_executePuzzleGameoverEvent(eventId);
-	}
-};
 Game_Map.prototype.baba_executeEventPuzzleGameoverEnd = function() {
 	var eventId = this.baba_getPuzzleGameoverEndEventId();
 	if (eventId > 0) {
-		/*var commonEvent = $dataCommonEvents[eventId];
-		if (commonEvent) {
-			this.setupChild(commonEvent.list, eventId);
-		}*/
 		this.baba_executePuzzleGameoverEvent(eventId);
 	}
 };
@@ -1255,20 +1050,8 @@ Game_Map.prototype.baba_isPuzzleGameover = function() {
 // 移动
 
 Game_Map.prototype.baba_addYouMoveAll = function(direction) {
-	//this.baba_babaEvents()
-	//  .filter(e => e.baba_checkRule('you'))
-	//  .forEach(e => this.baba_addEventMoveStep(e._eventId, direction), this);
-
-	//var events = this.baba_babaEvents()
-	//  .filter(e => e.baba_checkRule('you'));
-	//events.forEach(e => this.baba_addEventMoveStep(e._eventId, direction), this);
-	//events.forEach(e => e.baba_addMoveStep());
-
 	// ？涉及到移动的baba对象 不移动全都是 you规则的对象 ...
 
-	//this.baba_babaEvents()
-	//  .filter(e => e.baba_checkRule('you'))
-	//  .forEach(e => this.baba_addEventMoveStep(e._eventId, direction), this);
 	// ？you移动推动其他you 被推动的you相当于做了移动 所以不需要再次处理移动 ...
 
 	var events = this.baba_babaEvents()
@@ -1280,8 +1063,6 @@ Game_Map.prototype.baba_addYouMoveAll = function(direction) {
 		// 检查有移动的you对象 标记为不再处理
 		for (var j = 0; j < events.length; j++) {
 			if (flags[j]) continue;
-			//if (events[j]._baba_moveStepTempX != null) {
-			//  // 有设置临时位置
 			var e = events[j];
 			if (e._baba_moveStepTempX != null) {
 				if (e._baba_moveStepTempX != e._x || e._baba_moveStepTempY != e._y) {
@@ -1302,8 +1083,6 @@ Game_Map.prototype.baba_addMoveMoveAll = function() {
 		.filter(e => e.baba_checkRule('move'))
 		.forEach(e => {
 			this.baba_addEventMoveStep(e._eventId, e.direction(), false, true);
-			//this.baba_addEventMoveStep(e._eventId, 
-			//	e._baba_moveStepTempDirection || e.direction(), false, true);
 		}, this);
 
 	// TODO : 检查 not move
@@ -1326,7 +1105,6 @@ Game_Map.prototype.baba_addShiftMoveAll = function() {
 // ？为 baba事件 添加准备的移动 ...
 // ？可以通过 push规则 传递移动到其他 baba事件 ...
 // ？当不能移动时 停止传递 并拒绝添加移动 ...
-//Game_Map.prototype.baba_addEventMoveStep = function(eventId, direction, you) {
 Game_Map.prototype.baba_addEventMoveStep = function(eventId, direction, you, rebound) {
 	var event = this._events[eventId];
 	if (!this.baba_isBabaEvent(event)) {
@@ -1349,9 +1127,6 @@ Game_Map.prototype.baba_addEventMoveStep = function(eventId, direction, you, reb
 		// 停止传递 拒绝添加移动 回传false
 		if (you) {
 			event.baba_setMoveStepTemp(0, direction);
-			//if (event._direction != direction) {
-			//	event.baba_setMoveStepTemp(0, direction);
-			//}
 			return false;
 		}
 		else if (rebound) {
@@ -1378,7 +1153,6 @@ Game_Map.prototype.baba_addEventMoveStep = function(eventId, direction, you, reb
 			if (canPush) {
 				// 可以传递
 				// 添加自身事件的准备移动
-				//event.baba_addMoveStep(direction, direction);
 				event.baba_setMoveStepTemp(direction, direction);
 			}
 			else {
@@ -1386,9 +1160,6 @@ Game_Map.prototype.baba_addEventMoveStep = function(eventId, direction, you, reb
 				if (you) {
 					// you移动撞墙转向 (?)
 					event.baba_setMoveStepTemp(0, direction);
-					//if (event._direction != direction) {
-					//	event.baba_setMoveStepTemp(0, direction);
-					//}
 				}
 				else if (rebound) {
 					// 可以反弹
@@ -1404,7 +1175,6 @@ Game_Map.prototype.baba_addEventMoveStep = function(eventId, direction, you, reb
 		else {
 			// 不存在 push 对象
 			// 直接添加自身的准备移动
-			//event.baba_addMoveStep(direction, direction);
 			event.baba_setMoveStepTemp(direction, direction);
 			return true;
 		}
@@ -1424,7 +1194,6 @@ Game_Map.prototype.baba_addEventsMoveStep = function(x, y, direction, you) {
 		// 停止传递 拒绝添加移动 回传false
 		if (you) {
 			this.baba_babaEventsMoveStepAt(x, y)
-				//.filter(e => this.baba_checkItemRule(e._baba_item, 'you'), this)
 				.filter(e => e.baba_checkRule('you'))
 				.forEach(e => e.baba_setMoveStepTemp(0, direction));
 		}
@@ -1485,22 +1254,13 @@ Game_Map.prototype.baba_checkInMapSize = function(x, y) {
 	else return true;
 };
 // 是否阻止移动，不考虑传递
-//Game_Map.prototype.baba_checkEventsStopMove = function(x, y) {
 Game_Map.prototype.baba_checkEventsStopMove = function(x, y, you) {
-	//if (0 <= x && x < this.width() && 0 <= y && y < this.height()) {
-	//  // FINISH : baba 边界
 	if (this.baba_checkInMapSize(x, y)) {
 		// 边界内
-		//return this.baba_babaEventsMoveStepAt(x, y)   
-		//  .filter(e => !this.baba_checkItemRule(e._baba_item, 'push'), this)
-		//  .some(e => this.baba_checkItemRule(e._baba_item, 'stop'), this);
-		//  // 存在 非push规则 且 有stop规则 的对象     
 
 		if (!you) {
 			// 非you移动
 			return this.baba_babaEventsMoveStepAt(x, y) 
-				//.filter(e => !this.baba_checkItemRule(e._baba_item, 'push'), this)
-				//.some(e => this.baba_checkItemRule(e._baba_item, 'stop'), this);
 				.filter(e => !e.baba_checkRule('push'))
 				.some(e => e.baba_checkRule('stop'));
 				// 存在 非push规则 且 有stop规则 的对象
@@ -1508,9 +1268,6 @@ Game_Map.prototype.baba_checkEventsStopMove = function(x, y, you) {
 		else {
 			// you移动
 			return this.baba_babaEventsMoveStepAt(x, y) 
-				//.filter(e => !this.baba_checkItemRule(e._baba_item, 'push'), this)
-				//.filter(e => !this.baba_checkItemRule(e._baba_item, 'you'), this)
-				//.some(e => this.baba_checkItemRule(e._baba_item, 'stop'), this);
 				.filter(e => !e.baba_checkRule('push'))
 				.filter(e => !e.baba_checkRule('you'))
 				.some(e => e.baba_checkRule('stop'));
@@ -1527,21 +1284,6 @@ Game_Map.prototype.baba_checkEventsStopMove = function(x, y, you) {
 
 // 是否存在可push对象 (不考虑是否可以实际push)
 Game_Map.prototype.baba_checkEventsPushMove = function(x, y, you) {
-	//return this.baba_babaEventsMoveStepAt(x, y)   
-	//  .some(e => this.baba_checkItemRule(e._baba_item, 'push'), this);
-
-	/*
-	if (!you) {
-		return this.baba_babaEventsMoveStepAt(x, y) 
-			.some(e => this.baba_checkItemRule(e._baba_item, 'push'), this);
-	}
-	else {
-		return this.baba_babaEventsMoveStepAt(x, y) 
-			.some(e => this.baba_checkItemRule(e._baba_item, 'push')
-				 || this.baba_checkItemRule(e._baba_item, 'you'), this);
-	}
-	*/
-
 	// ？you移动的push发现其他you对象 不应该看做 其他you对象被该you对象推动 ...
 	// ？而应该是 忽视这个you对象 ...
 	// ？...
@@ -1574,31 +1316,17 @@ Game_Map.prototype.baba_checkEventsPushMove = function(x, y, you) {
 };
 
 Game_Map.prototype.baba_addEventPushMoveStep = function(x, y, direction, you) {
-	//this.baba_babaEventsMoveStepAt(x, y)
-	//  .filter(e => this.baba_checkItemRule(e._baba_item, 'push'), this)
-	//  //.forEach(e => e.baba_addMoveStep(direction, direction));
-	//  .forEach(e => e.baba_setMoveStepTemp(direction, direction));
-
 	if (!you) {
 		this.baba_babaEventsMoveStepAt(x, y)
-			//.filter(e => this.baba_checkItemRule(e._baba_item, 'push'), this)
 			.filter(e => e.baba_checkRule('push'))
 			.forEach(e => e.baba_setMoveStepTemp(direction, direction));
 	}
 	else {
-		//this.baba_babaEventsMoveStepAt(x, y)
-		//  .filter(e => this.baba_checkItemRule(e._baba_item, 'push')
-		//       || this.baba_checkItemRule(e._baba_item, 'you'), this)
-		//  .forEach(e => e.baba_setMoveStepTemp(direction, direction));
-
 		// you移动时 移动(x,y)位置的baba事件
 		// ？需要移动的有 push且非you、push且you、非push且you且stop ...
 		// ？非push非stop且you 不被传递push移动 ...
 		// ？只在 baba_addEventMoveStep 用 baba_setMoveStepTemp 添加移动 ...
 		this.baba_babaEventsMoveStepAt(x, y)
-			//.filter(e => this.baba_checkItemRule(e._baba_item, 'push')
-			//   || (this.baba_checkItemRule(e._baba_item, 'you')
-			//       && this.baba_checkItemRule(e._baba_item, 'stop')), this)
 			.filter(e => e.baba_checkRule('push')
 				 || (e.baba_checkRule('you') && e.baba_checkRule('stop')))
 			.forEach(e => e.baba_setMoveStepTemp(direction, direction));
@@ -1614,9 +1342,6 @@ Game_Map.prototype.baba_addBackMoveAll = function() {
 	// FINISH : 所有 baba事件 都不存在历史路径时 不进行 backMove
 	if (this.baba_checkBackMove()) {
 		this.baba_babaEvents().forEach(e => {
-		// ？未闲置的隐藏的baba事件 可能需要恢复显示 ...
-		//this.baba_noIdleBabaEvents().forEach(e => {
-		// ？分开处理 ...
 			if (e.baba_hasRouteTurn()) {
 				var route = e.baba_topRouteTurn();
 				for (var i = route.length-1; i >= 1; i--) {
@@ -1873,12 +1598,10 @@ Game_Map.prototype.baba_checkItemRule = function(item, rule) {
 
 Game_Map.prototype.baba_initItemRules = function() {
 	this._baba_itemRuleUnits = [];
-	//this._baba_itemRuleMap = {};
 	this._baba_babaEventRules = [];
 };
 Game_Map.prototype.baba_clearItemRules = function() {
 	this._baba_itemRuleUnits.splice(0);
-	//this._baba_itemRuleMap = {};
 	this._baba_babaEventRules.splice(0);
 };
 
@@ -2185,24 +1908,9 @@ Game_Map.prototype.baba_filterItemRuleUnits = function(name, x, y, eventId) {
 Game_Map.prototype.baba_makeItemBehaviorMap = function(eventId) {
 	var e = this._events[eventId];
 	var itemRuleUnits = this.baba_filterItemRuleUnits(e._baba_item, e._x, e._y, e._eventId);
-	
-	//var itemBehaviorMap = {};
-	//for (var text of baba_BABA_OBJECT_BEHAVIORTEXT_LIST) {
-	//  itemBehaviorMap[text] = [];
-	//}
-	//var itemBehaviorMap = {
-	//  'is' : [], 
-	//  'has' : [], 
-	//  'make' : [], 
-	//};
-
-	//for (var unit of itemRuleUnits) {
-	//  itemBehaviorMap[unit.behavior.name].push(unit.behavior.word);
-	//}
 
 	var itemBehaviorMap = {};
 
-	//itemBehaviorMap['is'] = [];
 	itemBehaviorMap['is'] = {};
 	var tempMap = {};
 	itemRuleUnits
@@ -2243,8 +1951,6 @@ Game_Map.prototype.baba_updateBabaEventsRules = function() {
 		}, this);
 };
 
-//Game_Map.prototype.baba_checkItemRule = function(name, x, y, rule) {
-//};
 Game_Map.prototype.baba_checkBabaEventRule = function(eventId, rule) {
 	var itemBehaviorMap = this._baba_babaEventRules[eventId];
 	if (!itemBehaviorMap) return false;
@@ -2291,37 +1997,10 @@ Game_Map.prototype.baba_updateRuleEffect_isTransform = function() {
 	// 变化的规则
 	var tfList = this._baba_itemRuleUnits.filter(
 		each => each.behavior.name == 'is'
-			// && this.baba_checkTypeIsWord(each.behavior.word.name));
-			// ？word 是 text_xxx ...
-			// ？item 才是 xxx ...
 			 && this.baba_checkTypeIsItem(each.behavior.word.name));
 	if (tfList.length <= 0) {
 		return false;
 	}
-
-	/*
-	// 变化的规则
-	var isItemRuleList = this._baba_itemRuleUnits.filter(
-		each => each.behavior.name == 'is'
-			// && this.baba_checkTypeIsWord(each.behavior.word.name));
-			// ？word 是 text_xxx ...
-			// ？item 才是 xxx ...
-			 && this.baba_checkTypeIsItem(each.behavior.word.name));
-
-	// 去除禁止变化的规则
-	var prohibitFlag = {};
-	isItemRuleList
-		.filter(each => each.mainWord.name == each.behavior.word.name)
-		.forEach(each => prohibitFlag[each.mainWord.name] = true);
-	var tfList = isItemRuleList.filter(each => 
-		!prohibitFlag[each.mainWord.name]
-			 && each.mainWord.name != each.behavior.word.name);
-
-	if (tfList.length <= 0) {
-		return false;
-	}
-	*/
-	// ？在处理映射表之后 可以方便地找到 禁止变化物体的变化 ...
 
 	// 全物体的集合
 	var itemSet = {};
@@ -2331,7 +2010,6 @@ Game_Map.prototype.baba_updateRuleEffect_isTransform = function() {
 
 	// 变化的映射表
 	var tfMap = {};
-	//var notTfMap = {};
 	var prohibitMap = {};
 	tfList.forEach(each => {
 		if (!each.behavior.word.parseDecorate.notWord) {
@@ -2341,7 +2019,6 @@ Game_Map.prototype.baba_updateRuleEffect_isTransform = function() {
 				var name1 = each.mainWord.name;
 				var name2 = each.behavior.word.name;
 				tfMap[name1] = tfMap[name1] || {};
-				//tfMap[name1][name2] = true;
 				tfMap[name1][name2] = tfMap[name1][name2] || 0;
 				tfMap[name1][name2]++;
 			}
@@ -2351,7 +2028,6 @@ Game_Map.prototype.baba_updateRuleEffect_isTransform = function() {
 				for (var name1 in itemSet) {
 					if (name1 != each.mainWord.name) {
 						tfMap[name1] = tfMap[name1] || {};
-						//tfMap[name1][name2] = true;
 						tfMap[name1][name2] = tfMap[name1][name2] || 0;
 						tfMap[name1][name2]++;
 					}
@@ -2514,31 +2190,24 @@ Game_Map.prototype.baba_updateRuleEffect_isTransform = function() {
 	return changed;
 };
 
-// TODO : 变化动画
+// TODO : 变化动画 粒子
 
-
-// TODO : 同统一pattern
 
 
 // --------------------------------
 // 更新baba规则
 
 Game_Map.prototype.baba_updateItemRuleAll = function() {
-	this.baba_clearItemRules(); // TODO
+	this.baba_clearItemRules();
 
-	//var ruleItemMap = null;
 	var itemRuleUnits = null;
 
 	// add base rule
-	//ruleItemMap = this.baba_makeItemRule_baseRule();
-	//this.baba_addItemRuleByRuleItemMap(ruleItemMap);
 	itemRuleUnits = this.baba_makeItemRuleUnits_baseRule();
 	//this.baba_addItemRuleByItemRuleUnits(itemRuleUnits);
 	this.baba_addItemRuleByItemRuleUnits(itemRuleUnits, true);
 
 	// add rule1
-	//ruleItemMap = this.baba_makeItemRule_rule1();
-	//this.baba_addItemRuleByRuleItemMap(ruleItemMap);
 	itemRuleUnits = this.baba_makeItemRuleUnits_rule1();
 	this.baba_addItemRuleByItemRuleUnits(itemRuleUnits);
 
@@ -2549,39 +2218,8 @@ Game_Map.prototype.baba_updateItemRuleAll = function() {
 };
 
 
-/*
-Game_Map.prototype.baba_addItemRuleByRuleItemMap = function(ruleItemMap) {
-	for (var item in ruleItemMap) {
-		for (var rule in ruleItemMap[item]) {
-			this.baba_setItemRule(item, rule, ruleItemMap[item][rule]);
-		}
-	}
-};
-*/
+// ？考虑全部的 text_xx 而非 当前出现的 text_xx ...
 
-/*
-Game_Map.prototype.baba_makeItemRule_baseRule = function() {
-	var ruleItemMap = {};
-	var item, rule;
-
-	// text is push
-	rule = 'push';
-	this.baba_babaEvents()
-		//.filter(e => e._baba_item.startsWith('text_'))
-		.filter(e => this.baba_checkTypeIsText(e._baba_item), this)
-		.forEach(e => {
-			var item = e._baba_item;
-			ruleItemMap[item] = ruleItemMap[item] || {};
-			ruleItemMap[item][rule] = true;
-		});
-	// ？考虑全部的 text_xx 而非 当前出现的 text_xx ...
-
-	// ? text is word
-	// ...
-
-	return ruleItemMap;
-};
-*/
 Game_Map.prototype.baba_makeItemRuleUnits_baseRule = function() {
 	var itemRuleUnits = [];
 
@@ -2610,7 +2248,6 @@ Game_Map.prototype.baba_makeItemRuleUnits_baseRule = function() {
 
 	// text is push
 	baba_BABA_OBJECT_TEXT_LIST.forEach(name => {
-		//itemRuleUnit.mainWord.name = name;
 		itemRuleUnit.mainWord.name = 'text_' + name;
 		itemRuleUnit.behavior.name = 'is';
 		itemRuleUnit.behavior.word.name = 'push';
@@ -2624,142 +2261,12 @@ Game_Map.prototype.baba_makeItemRuleUnits_baseRule = function() {
 };
 // ？根据基础规则 如 text is word 再加上 其他的 xx is word 构建下一步的规则 ...
 
-/*
+
 // ？不考虑 is word 规则 的检查规则 ...
 // ？text 自带 is word 规则 ...
-Game_Map.prototype.baba_makeItemRule_rule1 = function() {
-	var words = this.baba_babaEvents()
-		.filter(e => e.baba_getItem().startsWith('text_'))
-		// TODO : 检查 word规则的物体 和 普通word 的函数
-		.map(e => {
-			return {
-				x : e._x, 
-				y : e._y, 
-				word : e.baba_getItem(), 
-			}
-		});
 
-	var wordGrid = [];
-	//var width = this.width();
-	//var height = this.height();
-	var sizeX = this._baba_mapSizeX;
-	var sizeY = this._baba_mapSizeY;
-	var sizeW = this._baba_mapSizeW;
-	var sizeH = this._baba_mapSizeH;
-	//for (var y = 0; y < height; y++) {
-	for (var y = sizeY; y < sizeY+sizeH; y++) {
-		wordGrid[y] = [];
-		//for (var x = 0; x < width; x++) {
-		for (var x = sizeX; x < sizeX+sizeW; x++) {
-			wordGrid[y][x] = {
-				map : {}, 
-				list : [], 
-			}
-		}
-	}
-	words.forEach(function(each) {
-		var obj = wordGrid[each.y][each.x];
-		if (!obj.map[each.word]) {
-			obj.map[each.word] = true;
-			obj.list.push(each.word);
-		}
-		// ？相同对象重叠后只视作一个 ...
-	});
-	// TODO : 记录这些变量 并实时更新 ...
 
-	/*
-	var ruleSentences = [];
-	var tempSentence = [];
-	for (var y = 0; y < height; y++) {
-		for (var x = 0; x < width; x++) {
-			// 横向
-			for (var i = 0; i < width-x; i++) {
-				for (var word in wordGrid[y][x].map) {
-					tempSentence.push(..);
-					...
-				}
-
-				slice(0, ..)
-				...
-			}
-
-			// 纵向
-			...
-		}
-	}
-	* /
-	// TODO : ...
-
-	// 临时 : 只检查 baba/key is you/push 且不考虑重叠
-	var ruleSentences = [];
-	var tempSentence = [];
-	//for (var y = 0; y < height; y++) {
-	//  for (var x = 0; x < width; x++) {
-	for (var y = sizeY; y < sizeY+sizeH; y++) {
-		for (var x = sizeX; x < sizeX+sizeW; x++) {
-			// 横向
-			tempSentence.splice(0);
-			//for (var j = 0; j < width-x; j++) {
-			for (var j = 0; j < sizeX+sizeW-x; j++) {
-				if (wordGrid[y][x+j].list.length <= 0) {
-					break;
-				}
-				tempSentence.push(wordGrid[y][x+j].list[0]);
-			}
-			if (tempSentence.length >= 3) {
-				ruleSentences.push(tempSentence.splice(0));
-			}
-
-			// 纵向
-			tempSentence.splice(0);
-			//for (var i = 0; i < height-y; i++) {
-			for (var i = 0; i < sizeY+sizeH-y; i++) {
-				if (wordGrid[y+i][x].list.length <= 0) {
-					break;
-				}
-				tempSentence.push(wordGrid[y+i][x].list[0]);
-			}
-			if (tempSentence.length >= 3) {
-				ruleSentences.push(tempSentence.splice(0));
-			}
-		}
-	}
-
-	var ruleItemMap = {};
-	ruleSentences.forEach(function(arr) {
-		for (var i = 0, l = arr.length; i+2 < l; i++) {
-			//if (arr[i] != 'text_baba' && arr[i] != 'text_key' && arr[i] != 'text_wall') {
-			if (!this.baba_checkTypeIsWord(arr[i])) {
-				continue;
-			} // TODO : 检查 规则word的物体
-			var item = arr[i].slice('text_'.length);
-
-			if (arr[i+1] != 'text_is') {
-				continue;
-			}
-
-			//if (arr[i+2] != 'text_you' && arr[i+2] != 'text_push' && arr[i+2] != 'text_stop') {
-			if (!this.baba_checkTypeIsRule(arr[i+2])) {
-				continue;
-			}
-			var rule = arr[i+2].slice('text_'.length);
-
-			// 规则语句有效
-			ruleItemMap[item] = ruleItemMap[item] || {};
-			ruleItemMap[item][rule] = true;
-
-			i += 2; // 规则语句长度3
-
-			// TODO : 其他语法
-
-			// TODO : 条件规则
-		}
-		
-	}, this);
-
-	return ruleItemMap;
-};
-*/
+// ？语法树 ...
 
 // ？不考虑 is word 规则 的检查规则 ...
 // ？text 自带 is word 规则 ...
@@ -2802,17 +2309,6 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 	// ？一个语句有且只有一个 is文字 ...
 	// ？所以 应该围绕 is文字 实现相关逻辑 ...
 
-	/*
-	var wordIsGrid = {};
-	for (var key in wordGrid) {
-		if ('text_is' in wordGrid[key].map) {
-			wordIsGrid[key] = {
-				x : wordGrid[key].x, 
-				y : wordGrid[key].y, 
-			};
-		}
-	}
-	*/
 
 	// ？同方向的 is单词 不可重复用 ...
 	// ？同方向的其他单词可以重复用 ...
@@ -2872,6 +2368,7 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 
 
 	// ？暂时不考虑文字重叠的情况 ...
+	// (TODO)
 
 
 	// 规则源语句
@@ -3020,6 +2517,8 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 	}
 	...
 	*/
+
+	// ？语法树 ...
 
 	// ？用 文字的前接或后接文字类型 顺序解析语句文字 ...
 	/*
@@ -3180,7 +2679,6 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 		);
 
 
-	//var ruleSentence = [];
 	var itemRuleUnits = [];
 
 	//for (var list of ruleOriginSentences) {
@@ -3528,11 +3026,11 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 
 			if (list_index == list.length-1) {
 				// 遍历结束的检查
-				// ？相当于 传入异常的 word.type 使得进行结束遍历的处理 ...
+				// 相当于 传入异常的 word.type 使得进行结束遍历的处理
 
 				if (phase == 32) {
-					// ？结束在 behaviorWord阶段 语法末尾有多余文字 ...
-					// 必有 行为文字 如有 行为物体 则 tempBehavior 完整 可以写入 ...
+					// 结束在 behaviorWord阶段 语法末尾有多余文字
+					// 必有 行为文字 如有 行为物体 则 tempBehavior 完整 可以写入
 					if (tempBehavior.words.length > 0) {
 						phase = 98;
 					}
@@ -3541,23 +3039,19 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 					}
 				}
 				else if (phase == 33) {
-					// ？结束在 behaviorWordConnect阶段 语法完整且无多余文字 ...
+					// 结束在 behaviorWordConnect阶段 语法完整且无多余文字
 					phase = 98;
 				}
 				else if (phase == 34) {
-					// ？结束在 behaviorOrWord阶段 语法末尾有多余文字 ...
+					// 结束在 behaviorOrWord阶段 语法末尾有多余文字
 					phase = 98;
 				}
-				//else {
-				//  // ？结束在 其他阶段时 表示语法不完整 ...
-				//  phase = 99;
-				//}
 				else if (phase == 98) {
-					// ？已设置 phase = 98 也表示语法完整 ...
+					// 已设置 phase = 98 也表示语法完整
 					phase = 98;
 				}
 				else {
-					// ？结束在 其他阶段 表示语法不完整 ...
+					// 结束在 其他阶段 表示语法不完整
 					phase = 99;
 				}
 
@@ -3568,94 +3062,12 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 				// 写入
 				behaviors.push(tempBehavior);
 
-				//phase = 99;
 				break;
 			}
 			else if (phase == 99) {
 				break;
 			}
 		}
-
-		/*
-		// 遍历结束的检查
-		if (phase == 33) {
-			// ？结束在 behaviorWordConnect阶段 表示语法完整 ...
-			// ...
-		}
-		else if (phase == 32) {
-			// ？结束在 behaviorWord阶段 表示语法末尾有多余文字 ...
-			// ...
-		}
-		else if (phase == 31) {
-			// ？结束在 behavior阶段时 表示语法末尾有多余文字 ...
-			// ...
-		}
-		else {
-			// ？结束在 其他阶段时 表示语法不完整 ...
-			// ...
-		}
-		*/
-		// ？放入遍历中 当最后一次遍历的最后处理时 设置phase=98 ...
-		// ？兼容合并了 遍历结束后的写入 ...
-
-
-		// FINISH : 写入 ruleSentence
-		// FINISH : ruleSentence 改名
-
-		/*
-		var wordUnit = {
-			name : '', 
-			decorates : [], 
-		};
-		var conditionUnit = {
-			name : '', 
-			decorates : [], 
-			words : [], 
-		};
-		var behaviorUnit = {
-			name : '', 
-			words : [], 
-		};
-
-		var itemRuleUnit = {
-			word : {
-				name : '', 
-				decorates : [], 
-			}, 
-			conditions : [], 
-			behaviors : [], 
-		};
-
-		if (condition != null) {
-			conditionUnit.name = condition.text;
-			conditionUnit.decorates = condition.decorates;
-			conditionUnit.words = condition.words.map(word => {
-				return {
-					name : word.text, 
-					decorates : word.decorates, 
-				};
-			});
-			itemRuleUnit.conditions.push(conditionUnit);
-			// TODO : 多个条件
-		}
-		for (var behavior of behaviors) {
-			var tempUnit = JSON.parse(JSON.stringify(behaviorUnit));
-			tempUnit.name = behavior.text;
-			tempUnit.words = behavior.words.map(word => {
-				return {
-					name : word.text, 
-					decorates : word.decorates, 
-				};
-			});
-			itemRuleUnit.behavior.push(tempUnit);
-		}
-		for (var word of mainWords) {
-			var tempUnit = {
-				name : word.text, 
-				decorates : word.decorates, 
-			};
-		}
-		*/
 
 		if (phase == 98) {
 			var mainWordUnit = {
@@ -3733,15 +3145,8 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 		}
 		else if (phase == 98) {
 			// 正常语句
+			// 计算完整语句的结束位置
 
-			/*
-			for (var j = i; j >= sentence_s_index; j--) {
-				if (phaseList[j] == 33) {
-					sentence_e_index = j;
-					break;
-				}
-			} // 完整语句的结束位置
-			*/
 			// TODO : 完整语句发光
 
 			// ？下次 从该语句最后一个行为文字后 开始解析 ...
@@ -3793,16 +3198,11 @@ Game_Map.prototype.baba_makeItemRuleUnits_rule1 = function() {
 		// ？baba语法解析器 ...
 	}
 
-	// FINISH : 其他语法
-
-	// FINISH : 条件规则
-
-	//return ruleItemMap;
 	return itemRuleUnits;
 
 	// TODO : 检测规则的函数 适应该变化
 
-	// TODO : 测试
+	// TODO : 更严格的测试
 };
 
 
@@ -3827,7 +3227,8 @@ Game_Map.prototype.baba_babaEventsMoveStepAt = function(x, y) {
 		.filter(e => e._baba_moveStepX == x && e._baba_moveStepY == y);
 };
 
-// ？注意区分 erased 和 idle 和 show ...
+// 注意区分 erased 和 idle 和 show
+// TODO : 消除歧义
 
 Game_Map.prototype.baba_isNoIdleBabaEvent = function(e) {
 	return !!e && e.baba_isBabaEvent() && !e._baba_isIdleBabaEvent;
@@ -3848,8 +3249,6 @@ Game_Map.prototype.baba_hidedBabaEvents = function() {
 // --------------------------------
 // 添加和销毁 baba事件
 
-//const baba_BABA_EVENT_TEMPLATE = JSON.stringify({"id":1,"name":"EV001","note":"<baba is you:%name%>","pages":[{"conditions":{"actorId":1,"actorValid":false,"itemId":1,"itemValid":false,"selfSwitchCh":"A","selfSwitchValid":false,"switch1Id":1,"switch1Valid":false,"switch2Id":1,"switch2Valid":false,"variableId":1,"variableValid":false,"variableValue":0},"directionFix":true,"image":{"tileId":0,"characterName":"","direction":2,"pattern":1,"characterIndex":0},"list":[{"code":0,"indent":0,"parameters":[]}],"moveFrequency":3,"moveRoute":{"list":[{"code":0,"parameters":[]}],"repeat":true,"skippable":false,"wait":false},"moveSpeed":3,"moveType":0,"priorityType":0,"stepAnime":true,"through":true,"trigger":0,"walkAnime":false}],"x":1,"y":1});
-// ？需要将 priorityType 设为 1 ...
 const baba_BABA_EVENT_TEMPLATE = JSON.stringify({"id":1,"name":"EV001","note":"<baba is you:%name%>","pages":[{"conditions":{"actorId":1,"actorValid":false,"itemId":1,"itemValid":false,"selfSwitchCh":"A","selfSwitchValid":false,"switch1Id":1,"switch1Valid":false,"switch2Id":1,"switch2Valid":false,"variableId":1,"variableValid":false,"variableValue":0},"directionFix":true,"image":{"tileId":0,"characterName":"","direction":2,"pattern":1,"characterIndex":0},"list":[{"code":0,"indent":0,"parameters":[]}],"moveFrequency":3,"moveRoute":{"list":[{"code":0,"parameters":[]}],"repeat":true,"skippable":false,"wait":false},"moveSpeed":3,"moveType":0,"priorityType":1,"stepAnime":true,"through":true,"trigger":0,"walkAnime":false}],"x":1,"y":1});
 Game_Map.prototype.baba_babaEventTemplate = function() {
 	return JSON.parse(baba_BABA_EVENT_TEMPLATE);
@@ -3859,15 +3258,11 @@ Game_Map.prototype.baba_makeBabaEventData = function(eventId, name, x, y, d) {
 
 	var eventData = this.baba_babaEventTemplate();
 	eventData.id = eventId;
-	//eventData.meta['baba is you'] = name;
-	// ？此时还没有 meta ...
-	// ？需要用 DataManager.extractMetadata 从 note 提取到 meta ...
+	// 此时还没有 meta 需要用 DataManager.extractMetadata 从 note 提取到 meta
 	eventData.note = eventData.note.replace('<baba is you:%name%>', '<baba is you:'+name+'>')
 	DataManager.extractMetadata(eventData);
 	eventData.name = name + '_' + eventId;
 	var image = eventData.pages[0].image;
-	//image.characterName = '!$'+name;
-	//image.characterName = this.baba_checkTypeIsTileItem(name) ? '!'+name+'_tile1' : '!$'+name;
 	image.characterName = this.baba_makeBabaCharacterName(name);
 	image.characterIndex = 0;
 	image.direction = d;
@@ -3880,7 +3275,6 @@ Game_Map.prototype.baba_makeBabaCharacterName = function(name) {
 	return this.baba_checkTypeIsTileItem(name) ? '!'+name+'_tile1' : '!$'+name;
 };
 
-//Spriteset_Map.prototype.addEventCharacter = function(event) {
 Spriteset_Map.prototype.baba_addBabaEventCharacter = function(event) {
 	var sprite = new Sprite_Character(event);
 	this._characterSprites.push(sprite);
@@ -3911,17 +3305,11 @@ Game_Map.prototype.baba_addBabaEvent = function(name, x, y, d) {
 
 // FINISH : 增加baba事件的缓存机制 类似对象池
 
-//Game_Map.prototype.baba_removeBabaEvent = function(eventId) {
 Game_Map.prototype.baba_deactivateBabaEvent = function(eventId) {
-	//delete $dataMap.events[eventId];
-	//delete this._events[eventId];
-	// ？这样是否可以 ...
-
-	// FINISH : ？移除事件仅抹去事件 添加事件也可以从这些抹去事件中恢复 ...
+	// 移除事件仅抹去事件 添加事件也可以从这些抹去事件中恢复
 
 	var event = this.event(eventId);
 	if (event) {
-		//event.erase();
 		event.baba_deactivateBabaEvent();
 	}
 };
@@ -3929,17 +3317,16 @@ Game_Event.prototype.baba_deactivateBabaEvent = function() {
 	this.erase();
 	this._baba_isIdleBabaEvent = true;
 
-	this.setImage('', 0); // ?
+	this.setImage('', 0);
 
-	// FINISH : 销毁时清理路线记录
-
+	// 销毁时清空路线记录
 	this.baba_initReadyMoveStep();
 	this.baba_initRouteTurn();
 	// ...
 };
 
-// ？隐藏baba事件 ...
-// ？在回退操作时可能再出现 在隐藏期间不能被占用 ...
+// 隐藏baba事件
+// 在回退操作时可以再出现 在隐藏期间不能被占用
 Game_Map.prototype.baba_hideBabaEvent = function(eventId) {
 	var event = this.event(eventId);
 	if (event) {
@@ -3950,8 +3337,7 @@ Game_Event.prototype.baba_hideBabaEvent = function() {
 	this.erase();
 };
 
-// ？显示baba事件 ...
-// ？隐藏baba事件 的回退 ...
+// 显示baba事件 即 隐藏baba事件 的回退
 Game_Map.prototype.baba_showBabaEvent = function(eventId) {
 	var event = this.event(eventId);
 	if (event) {
@@ -3964,42 +3350,20 @@ Game_Event.prototype.baba_showBabaEvent = function() {
 	// ？刷新事件会用事件数据重置事件的图像 ...
 };
 
-/*Game_Map.prototype.baba_requireNewBabaEvent = function() {
-	//return this.baba_addBabaEvent('text_is', -1, -1, 2);
-	//return this.baba_addBabaEvent('', -1, -1, 2);
-	return this.baba_addBabaEvent('XXX', -1, -1, 2);
-};*/
 Game_Map.prototype.baba_requireNewBabaEvent = function(name) {
 	return this.baba_addBabaEvent(name || 'XXX', -1, -1, 2);
 };
-//Game_Map.prototype.baba_requireIdleBabaEvent = function() {
 Game_Map.prototype.baba_requireIdleBabaEvent = function(name) {
-	/*// this.baba_idleBabaEvents()
-	// this.baba_isIdleBabaEvent(e)
-	var list = this._events
-		.filter(e => !!e && !!e._erased && e.baba_isBabaEvent());
-	if (list.length > 0) {
-		return list[0];
-	}
-	else {
-		return this.baba_requireNewBabaEvent();
-	}*/
 	var event = this._events
-		//.find(e => !!e && !!e._erased && e.baba_isBabaEvent());
 		.find(e => !!e && !!e._baba_isIdleBabaEvent && e.baba_isBabaEvent());
-	//return event || this.baba_requireNewBabaEvent();
 	return event || this.baba_requireNewBabaEvent(name);
 };
 
 Game_Map.prototype.baba_requireBabaEvent = function(name, x, y, d) {
-	//var event = this.baba_addBabaEvent(name, x, y, d);
-	//var event = this.baba_requireIdleBabaEvent();
 	var event = this.baba_requireIdleBabaEvent(name);
 
 	var eventData = event.event();
-	// ？是否要修改 eventData ...
-	// ？在刷新事件页时 会通过事件数据设置baba事件 所以需要修改 eventData ...
-	// ？或者修改设置baba事件的时机 ...
+	// 在刷新事件页时 会通过事件数据设置baba事件 所以需要修改 eventData
 	eventData.meta['baba is you'] = name;
 	eventData.pages[0].image.characterName = this.baba_makeBabaCharacterName(name);
 
@@ -4142,7 +3506,6 @@ const baba_BABA_TILESET_CONFIG_WORD = [
 	'baba', 'key', 'door', 'flag', 'rock', 'wall', 'tree', 'grass', 
 	'tile', 'keke', 
 ];
-//const baba_BABA_TILESET_CONFIG_WORD = baba_BABA_TILESET_CONFIG_ITEM.slice(0);
 const baba_BABA_TILESET_CONFIG_RULE = [
 	'you', 'win', 'stop', 'push', 'move', 
 ];
@@ -4177,13 +3540,6 @@ Game_Map.prototype.baba_isBabaTilesetIndex = function(index) {
 };
 Game_Map.prototype.baba_getBabaTilesetName = function(index) {
 	if (this.baba_isBabaTilesetIndex(index)) {
-		//var config = [
-		//  baba_BABA_TILESET_CONFIG_ITEM, 
-		//  baba_BABA_TILESET_CONFIG_WORD, 
-		//  baba_BABA_TILESET_CONFIG_RULE, 
-		//  baba_BABA_TILESET_CONFIG_OTHERTEXT, 
-		//][Math.floor((index - 768) / 32)];
-
 		return baba_BABA_TILESET_CONFIG_ALL[index - 768];
 	}
 	else {
@@ -4305,25 +3661,6 @@ Spriteset_Map.prototype.createTilemap = function() {
 	this._tilemap._height = Graphics.height + margin * 2;
 };
 
-/*
-// 不绘制地图外的部分
-Tilemap.prototype._posInMapData = function(x, y) {
-	return 0 <= x && x < this._mapWidth && 0 <= y && y < this._mapHeight;
-};
-const _MK_Tilemap__paintTiles = Tilemap.prototype._paintTiles;
-Tilemap.prototype._paintTiles = function(startX, startY, x, y) {
-	if (this._posInMapData(startX + x, startY + y)) {
-		_MK_Tilemap__paintTiles.apply(this, arguments);
-	}
-};
-const _MK_ShaderTilemap__paintTiles = ShaderTilemap.prototype._paintTiles;
-ShaderTilemap.prototype._paintTiles = function(startX, startY, x, y) {
-	if (this._posInMapData(startX + x, startY + y)) {
-		_MK_ShaderTilemap__paintTiles.apply(this, arguments);
-	}
-};
-*/
-
 
 
 
@@ -4334,13 +3671,6 @@ ShaderTilemap.prototype._paintTiles = function(startX, startY, x, y) {
 Game_Event.prototype.baba_isBabaEvent = function() {
 	return !!this.event().meta['baba is you'];
 };
-
-//Game_Event.prototype.baba_checkYou = function() {
-//  return this.baba_isBabaEvent();
-//  // ...
-//};
-// ？you是规则中的一种 其他规则也需要被检查 ...
-
 
 /*const _MK_Game_Event_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
@@ -4366,18 +3696,17 @@ Game_Map.prototype.setupEvents = function() {
 		.forEach(e => e.baba_initBabaEventByData());
 };
 
-// ？有几率在执行谜题gameover事件后 变成事件数据中的图像 ...
+// 执行谜题gameover触发事件后 会调用refresh使得变成事件数据中的图像 所以需要重新设置图像
 const _MK_Game_Event_refresh = Game_Event.prototype.refresh;
 Game_Event.prototype.refresh = function() {
 	_MK_Game_Event_refresh.apply(this, arguments);
-
 	this.baba_refreshItemImage();
 };
 
+// 地图刷新时 会刷新tile类事件 使得显示异常
 const _MK_Game_Map_refresh = Game_Map.prototype.refresh;
 Game_Map.prototype.refresh = function() {
 	_MK_Game_Map_refresh.apply(this, arguments);
-	// ？地图刷新时 会刷新tile类事件 使得显示异常 ...
 	this.baba_updateTileEventImageAll();
 };
 
@@ -4391,8 +3720,6 @@ Game_Map.prototype.refresh = function() {
 
 Game_Event.prototype.baba_initItem = function() {
 	var item = this.event().meta['baba is you'];
-	//this._baba_item = item || '';
-	//this._baba_item = typeof item === 'string' ? item.trim() : '';
 	this.baba_setItem(typeof item === 'string' ? item.trim() : '');
 };
 
@@ -4400,29 +3727,19 @@ Game_Event.prototype.baba_initBabaEventByData = function() {
 	if (this.baba_isBabaEvent()) {
 		this.baba_initItem();
 		this.baba_initPaletteIndex();
-		//this.baba_initMoveStep();
 		this.baba_initReadyMoveStep();
 		this.baba_initRouteTurn();
 	}
 };
 
-/*Game_Event.prototype.baba_setItem = function(item) {
-	this._baba_item = item || '';
-};*/
 Game_Event.prototype.baba_setItem = function(item) {
 	item = item || '';
 	if (this._baba_item !== item) {
-		// 临时
-		// 处理用脚本执行的 baba_setItem 的规则更新
-		//this._baba_itemChanged = true;
-
 		this._baba_item = item;
 		this.baba_refreshItemImage();
 
 		if (this._baba_item) {
-			//this.baba_initItem();
 			this.baba_initPaletteIndex();
-			//this.baba_initMoveStep();
 			//this.baba_initReadyMoveStep(); // ？该轮的准备移动 需要重置 ...
 			// ？需要在设置位置和方向后调用 ...
 			//this.baba_initRouteTurn(); // ？总的行动路线 不能重置 ...
@@ -4442,10 +3759,6 @@ Game_Event.prototype.baba_setItemAndAddRoute = function(item) {
 	}
 };
 
-/*Game_Event.prototype.baba_refreshItemImage = function() {
-	var name = $gameMap.baba_makeBabaCharacterName(this._baba_item);
-	this.setImage(name, 0);
-};*/
 Game_Event.prototype.baba_refreshItemImage = function() {
 	if (this._baba_item) {
 		var name = $gameMap.baba_makeBabaCharacterName(this._baba_item);
@@ -4456,15 +3769,11 @@ Game_Event.prototype.baba_refreshItemImage = function() {
 	}
 };
 
-// FINISH : item变换 (包括循环变化，一变多变化 等)
-
 Game_Event.prototype.baba_getItem = function() {
 	return this._baba_item;
 };
 
-
 Game_Event.prototype.baba_checkRule = function(rule) {
-	//return $gameMap.baba_checkItemRule(this._baba_item, rule);
 	return $gameMap.baba_checkBabaEventRule(this._eventId, rule);
 };
 
@@ -4567,10 +3876,6 @@ Game_Event.prototype.baba_initReadyMoveStep = function() {
 	this._baba_moveStepY = this._y;
 
 	// 该轮移动的该阶段的该步的临时移动位置和方向
-	//this._baba_moveStepTempX = this._x;
-	//this._baba_moveStepTempY = this._y;
-	//this._baba_moveStepTempFacingDirection = this._direction;
-	//this._baba_moveStepTempDirection = 0;
 	this._baba_moveStepTempX = null;
 	this._baba_moveStepTempY = null;
 	this._baba_moveStepTempFacingDirection = null;
@@ -4583,20 +3888,12 @@ Game_Event.prototype.baba_clearMoveStep = function() {
 	this._baba_readyMoveSteps.splice(0);
 	this._baba_moveStepX = this._x;
 	this._baba_moveStepY = this._y;
-	//this._baba_moveStepTempX = this._x;
-	//this._baba_moveStepTempY = this._y;
-	//this._baba_moveStepTempFacingDirection = this._direction;
-	//this._baba_moveStepTempDirection = 0;
 	this._baba_moveStepTempX = null;
 	this._baba_moveStepTempY = null;
 	this._baba_moveStepTempFacingDirection = null;
 	this._baba_moveStepTempDirection = null;
 };
 Game_Event.prototype.baba_clearMoveStepTemp = function() {
-	//this._baba_moveStepTempX = this._x;
-	//this._baba_moveStepTempY = this._y;
-	//this._baba_moveStepTempFacingDirection = this._direction;
-	//this._baba_moveStepTempDirection = 0;
 	this._baba_moveStepTempX = null;
 	this._baba_moveStepTempY = null;
 	this._baba_moveStepTempFacingDirection = null;
@@ -4605,23 +3902,6 @@ Game_Event.prototype.baba_clearMoveStepTemp = function() {
 
 // 设置临时移动位置
 Game_Event.prototype.baba_setMoveStepTemp = function(direction, facingDirection) {
-	/*
-	if (direction > 0) {
-		this._baba_moveStepTempX = $gameMap.roundXWithDirection(this._baba_moveStepX, direction);
-		this._baba_moveStepTempY = $gameMap.roundYWithDirection(this._baba_moveStepY, direction);
-	}
-	else {
-		this._baba_moveStepTempX = this._baba_moveStepX;
-		this._baba_moveStepTempY = this._baba_moveStepY;
-	}
-	this._baba_moveStepTempFacingDirection = facingDirection;
-	this._baba_moveStepTempDirection = direction;
-
-	//this._baba_moveStepTempDirty = true;
-	*/
-
-	// ？无移动且不改变朝向时 不记录变化 ...
-
 	if (direction > 0) {
 		this._baba_moveStepTempX = $gameMap.roundXWithDirection(this._baba_moveStepX, direction);
 		this._baba_moveStepTempY = $gameMap.roundYWithDirection(this._baba_moveStepY, direction);
@@ -4633,6 +3913,9 @@ Game_Event.prototype.baba_setMoveStepTemp = function(direction, facingDirection)
 		this._baba_moveStepTempY = this._baba_moveStepY;
 		this._baba_moveStepTempFacingDirection = facingDirection;
 		this._baba_moveStepTempDirection = direction;
+	}
+	else {
+		// 无移动且不改变朝向时 不记录变化
 	}
 
 	// ？临时位置是覆盖式的 更后写入的移动覆盖更早写入的移动 ...
@@ -4662,9 +3945,7 @@ Game_Event.prototype.baba_addMoveStep = function() {
 // TODO : 直接写入BackMove的移动的方法
 
 
-
 Game_Event.prototype.baba_executeAllMoveStep = function(back) {
-	//for (var obj of this._baba_moveSteps) {
 	for (var obj of this._baba_readyMoveSteps) {
 		this.baba_executeMove(obj.md, obj.fd, back);
 	}
@@ -4687,15 +3968,12 @@ Game_Event.prototype.baba_executeMove = function(direction, facingDirection, bac
 		// TODO : backMove 先移动再修改方向
 	}
 
-	// FINISH : 朝向方向
-
 	if (!back) {
 		// ？全部移动完 并 执行变换item后 记录位置 ...
 		// ？记录本回合的移动 ...
 		// ？变换item也作为一步路线 ...
 
-		//this.baba_addRoute(this._x, this._y, this._direction, direction, 1);
-		// ？移动方向为0时不移动 此时移动距离为0 ...
+		// 移动方向为0时不移动 此时移动距离为0
 		this.baba_addRoute(this._x, this._y, this._direction, 
 			direction, direction > 0 ? 1 : 0);
 	}
@@ -4711,19 +3989,8 @@ Game_Event.prototype.baba_isMoving = function() {
 
 
 
-// XX Item
-
-//Game_Event.prototype.baba_setXXX = function() {
-//};
-//Game_Event.prototype.baba_setXXXByRoute = function() {
-//};
-// TODO
-
-
-
-
 // --------------------------------
-// 颜色
+// 颜色 染色
 
 ImageManager.baba_loadBabaPalettes = function(filename, hue) {
 	return this.loadBitmap('img/palettes/', filename, hue, false);
@@ -4781,55 +4048,11 @@ Game_Screen.prototype.baba_getPaletteTone = function(index) {
 		return [0, 0, 0, 0];
 	}
 	else {
-		//return this._baba_paletteData[index].slice(0);
-		// ？sprite.setColorTone 会复制 tone数组 ...
 		return this._baba_paletteData[index];
 	}
 }
 
-
-//const _MK_Game_Event_updateBitmap = Game_Event.prototype.updateBitmap;
-//Game_Event.prototype.updateBitmap = function() {
-//  _MK_Game_Event_updateBitmap.apply(this, arguments);
-//  ...
-//};
-//Game_Event.prototype.baba_updateBabaTone = function() {
-//  // ...
-//};
-
-//Game_Event.prototype.baba_initBabaTone = function() {
-//  this._baba_paletteIndex = -1;
-//  this._baba_tone = [0, 0, 0, 0];
-//};
-//Game_Event.prototype.baba_setPaletteIndex = function(index) {
-//  this._baba_paletteIndex = index;
-//  this._baba_tone = ...
-//};
-//Game_Event.prototype.baba_setBabaTone = function(index) {
-//};
-//Game_Event.prototype.baba_babaTone = function() {
-//};
-
 Game_Event.prototype.baba_initPaletteIndex = function() {
-	//this._baba_paletteIndex = -1;
-
-	// 临时
-	/*
-	switch (this._baba_item) {
-		case 'tile': this._baba_paletteIndex = 1; break;
-		case 'wall': this._baba_paletteIndex = 8; break;
-		case 'text_wall': this._baba_paletteIndex = 8; break;
-		case 'tree': this._baba_paletteIndex = 19; break;
-		case 'text_tree': this._baba_paletteIndex = 19; break;
-		case 'grass': this._baba_paletteIndex = 5; break;
-		case 'baba': this._baba_paletteIndex = -1; break;
-		case 'text_is': this._baba_paletteIndex = -1; break;
-		case 'text_baba': this._baba_paletteIndex = 11; break;
-		case 'text_you': this._baba_paletteIndex = 11; break;
-		case 'text_win': this._baba_paletteIndex = 13; break;
-		case 'text_stop': this._baba_paletteIndex = 12; break;
-	}
-	*/
 	var paletteIndexMap = {
 		'tile': 1, 
 		'flag': 30, 
@@ -4889,10 +4112,12 @@ Sprite_Character.prototype.baba_updateBabaTone = function() {
 	// 但结果无效
 };
 
-
 // TODO : 颜色配置 颜色设置规律 等
 
 // TODO : 规则语法正确时 发光
+
+// TODO : 解决加载大量图块类图像(如wall)时卡顿的问题
+
 
 
 // --------------------------------
